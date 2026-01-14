@@ -3,172 +3,518 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TurboGTO Pro - Bounty Edition</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>TurboGTO - Coach Poker Pro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0f1423; --bg-card: #1a2236; --accent-red: #d13333;
-            --text-white: #ffffff; --text-gray: #8b9bb4; --suit-red: #e74c3c;
-            --gold: #f1c40f;
+            --bg-dark: #0f1423;
+            --bg-panel: #1a2236;
+            --accent: #d13333;
+            --accent-hover: #b02a2a;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --success: #4ade80;
+            --warning: #facc15;
+            --danger: #f87171;
+            --gold: #ffd700;
         }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-dark); color: var(--text-white); margin: 0; padding: 0; }
-        header { padding: 15px 20px; border-bottom: 1px solid #2a3b55; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 1.5rem; font-weight: bold; } .logo span { color: var(--accent-red); }
-        .container { padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; }
-        
-        .tourney-nav { display: flex; gap: 5px; margin-bottom: 15px; }
-        .t-btn { flex: 1; background: var(--bg-card); border: 1px solid #2a3b55; color: white; padding: 10px; border-radius: 5px; cursor: pointer; }
-        .t-btn.active { background: var(--accent-red); border-color: var(--accent-red); }
 
-        .card-section { background: var(--bg-card); border-radius: 10px; padding: 15px; border: 1px solid #2a3b55; margin-bottom: 15px; }
-        .cards-display { display: flex; justify-content: center; gap: 15px; margin: 15px 0; }
-        .card-slot { width: 75px; height: 100px; background: #2a3b55; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; border: 2px solid transparent; }
-        .card-slot.filled { background: white; color: black; }
-        .card-val { font-size: 1.8rem; font-weight: bold; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        .input-row { margin-bottom: 12px; }
-        .label { color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        select, input { width: 100%; padding: 10px; background: var(--bg-dark); border: 1px solid #2a3b55; color: white; border-radius: 5px; }
-        
-        #bounty-zone { display: none; border: 1px solid var(--gold); padding: 10px; border-radius: 5px; margin-bottom: 15px; background: rgba(241, 196, 15, 0.05); }
-        .gold-text { color: var(--gold); font-weight: bold; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column;
+            min-height: 100vh;
+        }
 
-        .analyze-btn { width: 100%; background: var(--accent-red); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        /* HEADER */
+        header {
+            padding: 15px 20px;
+            background: var(--bg-dark);
+            border-bottom: 1px solid #2a3b55;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 50;
+        }
+        .logo { font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; }
+        .logo span { color: var(--accent); }
+        .reset-btn {
+            background: rgba(255,255,255,0.1); border: none; color: var(--text-muted);
+            padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+        }
+
+        /* CONTAINER */
+        .main-container {
+            flex: 1; padding: 20px; max-width: 650px; margin: 0 auto; width: 100%;
+        }
+
+        /* PANEL STYLE */
+        .panel {
+            background: var(--bg-panel); border: 1px solid #2a3b55; border-radius: 12px;
+            padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .panel-header {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 15px;
+            color: var(--text-main); font-weight: 700; font-size: 1rem;
+            border-bottom: 1px solid #2a3b55; padding-bottom: 10px;
+        }
+        .panel-header i { color: var(--accent); }
+
+        /* FORM ELEMENTS */
+        label { display: block; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 5px; font-weight: 600; }
+        select, input[type="number"] {
+            width: 100%; padding: 12px; background: var(--bg-dark); border: 1px solid #374151;
+            color: white; border-radius: 8px; font-size: 1rem; outline: none; margin-bottom: 10px;
+        }
+        select:focus, input:focus { border-color: var(--accent); }
+
+        /* BOUNTY SPECIFIC */
+        #ko-options {
+            background: rgba(255, 215, 0, 0.05); border: 1px solid var(--gold);
+            padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none;
+        }
+        .gold-label { color: var(--gold) !important; }
+
+        /* TABS */
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; background: var(--bg-dark); padding: 5px; border-radius: 8px; }
+        .tab {
+            flex: 1; text-align: center; padding: 10px; border-radius: 6px;
+            cursor: pointer; color: var(--text-muted); font-weight: 600; font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .tab.active { background: var(--bg-panel); color: var(--text-main); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        /* CARD SELECTOR UI */
+        .cards-wrapper { display: flex; justify-content: center; gap: 20px; margin: 10px 0 20px 0; }
+        .card-slot {
+            width: 85px; height: 120px; background: #e2e8f0; border-radius: 8px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer; position: relative; border: 3px solid transparent;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.1s;
+        }
+        .card-slot:active { transform: scale(0.96); }
+        .card-slot.empty { background: #2a3b55; border: 2px dashed #4b5563; }
+        .card-slot.empty::after { content: '+'; font-size: 2rem; color: #4b5563; }
+        .card-slot.filled { background: white; border-color: white; }
+        .c-rank { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+        .c-suit { font-size: 1.8rem; line-height: 1; }
+        .red-card { color: #dc2626; } .black-card { color: #1f2937; }
+
+        /* SCAN AREA */
+        .scan-container {
+            border: 2px dashed var(--text-muted); border-radius: 10px; height: 150px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.2); cursor: pointer; position: relative; overflow: hidden;
+        }
+        #camera-stream { position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; display: none; }
+        .scan-overlay { z-index: 2; text-align: center; }
+
+        /* SLIDER */
+        .range-wrap { display: flex; align-items: center; gap: 15px; margin-top: 5px; }
+        .stack-disp {
+            background: #000; color: var(--accent); font-weight: 800; padding: 5px 10px;
+            border-radius: 5px; min-width: 50px; text-align: center;
+        }
+        input[type=range] { flex: 1; height: 6px; background: #374151; border-radius: 3px; -webkit-appearance: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--accent); border-radius: 50%; margin-top: -7px; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #374151; border-radius: 3px; }
+
+        /* ACTION BUTTON */
+        .cta-btn {
+            width: 100%; padding: 16px; border: none; border-radius: 8px;
+            background: var(--accent); color: white; font-size: 1.2rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(209, 51, 51, 0.4); margin-top: 10px;
+        }
+        .cta-btn:active { transform: translateY(2px); }
+
+        /* RESULTS */
+        #result-area { display: none; margin-top: 20px; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        #result { display: none; margin-top: 20px; padding: 20px; background: var(--bg-card); border-radius: 10px; text-align: center; border-top: 4px solid var(--accent-red); }
-        .res-title { font-size: 2.2rem; font-weight: 900; }
-        
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
-        .modal.show { display: flex; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; width: 100%; max-width: 400px; }
-        .m-btn { background: var(--bg-card); border: 1px solid #2a3b55; color: white; padding: 15px; border-radius: 5px; text-align: center; font-weight: bold; cursor: pointer; }
+        .result-main { text-align: center; margin-bottom: 20px; }
+        .action-big { font-size: 2.8rem; font-weight: 900; line-height: 1; margin: 10px 0; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .coach-box {
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;
+            border-left: 4px solid var(--accent); font-style: italic; color: #d1d5db;
+        }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .stat-card { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center; }
+        .stat-val { display: block; font-size: 1.2rem; font-weight: 700; color: var(--success); }
+        .stat-lbl { font-size: 0.7rem; color: var(--text-muted); }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 100; display: none;
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        .modal-content { width: 90%; max-width: 400px; }
+        .grid-ranks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+        .grid-suits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .picker-btn {
+            background: var(--bg-panel); border: 1px solid #374151; color: white;
+            padding: 15px 0; text-align: center; font-weight: 700; border-radius: 6px; cursor: pointer;
+        }
+        .picker-btn:active { background: var(--accent); border-color: var(--accent); }
+        .modal-title { text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
+
+        /* HISTORY */
+        .history-list { list-style: none; padding: 0; max-height: 150px; overflow-y: auto; }
+        .hist-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2a3b55; font-size: 0.85rem; color: var(--text-muted); }
+        .hist-hand { color: white; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">TURBO<span>GTO</span></div>
-    <div style="font-size: 0.8rem; color: var(--text-gray);">COACH BOUNTY v2</div>
+    <div class="logo"><i class="fas fa-biohazard"></i> TURBO<span>GTO</span></div>
+    <button class="reset-btn" onclick="resetApp()"><i class="fas fa-redo"></i> Reset</button>
 </header>
 
-<div class="container">
-    <div class="tourney-nav">
-        <button class="t-btn active" onclick="switchT(this, 'classic')">Classique</button>
-        <button class="t-btn" onclick="switchT(this, 'ko')">KO / Bounty</button>
-    </div>
+<div class="main-container">
 
-    <div id="bounty-zone">
-        <label class="label gold-text">Prime de l'adversaire (Bounty)</label>
-        <select id="bounty-size">
-            <option value="0">Pas de prime (ou il me couvre)</option>
-            <option value="1">Petite prime</option>
-            <option value="2">Grosse prime (x3+)</option>
-            <option value="3">ÉNORME Prime (Couvre mon Buy-in)</option>
+    <div class="panel">
+        <div class="panel-header"><i class="fas fa-chess"></i> Configuration du Tournoi</div>
+        
+        <label>Format de jeu</label>
+        <select id="game-mode" onchange="updateGameMode()">
+            <option value="expresso">Expresso / Spin (3-Max)</option>
+            <option value="nitro">Expresso NITRO (Ultra Turbo)</option>
+            <option value="ko">KO / Bounty Hunter</option>
+            <option value="mtt">MTT Classique (Monster/Deep)</option>
         </select>
-    </div>
 
-    <div class="card-section">
-        <div class="cards-display">
-            <div class="card-slot" id="slot1" onclick="openPicker(1)"><div class="card-val">?</div><div class="card-suit"></div></div>
-            <div class="card-slot" id="slot2" onclick="openPicker(2)"><div class="card-val">?</div><div class="card-suit"></div></div>
-        </div>
-
-        <div class="input-row">
-            <label class="label">Ma Position</label>
-            <select id="pos">
-                <option value="UTG">UTG</option><option value="CO">Cut-Off</option>
-                <option value="BTN" selected>Bouton</option><option value="SB">Small Blind</option>
-                <option value="BB">Big Blind</option>
+        <div id="ko-options">
+            <label class="gold-label"><i class="fas fa-crosshairs"></i> Bounty sur l'adversaire</label>
+            <select id="bounty-level">
+                <option value="0">Aucun / Faible</option>
+                <option value="1">Moyen (Vaut le coup)</option>
+                <option value="2">ÉNORME (Couvre mon Buy-in)</option>
             </select>
         </div>
 
-        <div class="input-row">
-            <label class="label">Mon Stack : <span id="stackLab" style="color:var(--accent-red)">20</span> BB</label>
-            <input type="range" id="stack" min="1" max="100" value="20" oninput="document.getElementById('stackLab').innerText=this.value">
+        <div id="ante-options" style="display:none; margin-top:10px;">
+            <label>Pr présence d'Ante ?</label>
+            <select id="ante-bool">
+                <option value="0">Non</option>
+                <option value="1">Oui (10-12.5%)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="setMode('manual')" id="tab-manual">Manuel</div>
+        <div class="tab" onclick="setMode('scan')" id="tab-scan">Scan / Photo</div>
+    </div>
+
+    <div id="view-scan" style="display:none;" class="panel">
+        <div class="scan-container" onclick="toggleCamera()">
+            <video id="camera-stream" autoplay playsinline></video>
+            <div class="scan-overlay">
+                <i class="fas fa-camera" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <p>Scanner la table<br><span style="font-size:0.8rem; color:#8b9bb4">(Simulation)</span></p>
+            </div>
+        </div>
+        <p style="text-align:center; font-size:0.8rem; margin-top:10px; color:var(--text-muted);">L'IA analysera la position et les cartes automatiquement.</p>
+    </div>
+
+    <div id="view-manual">
+        <div class="panel">
+            <div class="panel-header"><i class="fas fa-hand-paper"></i> Ma Main & Stack</div>
+            
+            <div class="cards-wrapper">
+                <div class="card-slot empty" id="c1" onclick="openPicker(1)"></div>
+                <div class="card-slot empty" id="c2" onclick="openPicker(2)"></div>
+            </div>
+
+            <label>Position</label>
+            <select id="position">
+                <option value="BTN">Bouton (BTN)</option>
+                <option value="SB">Small Blind (SB)</option>
+                <option value="BB">Big Blind (BB)</option>
+                <option value="UTG">UTG (Début de parole)</option>
+                <option value="HJ">Hi-Jack</option>
+                <option value="CO">Cut-Off</option>
+            </select>
+
+            <label style="margin-top:15px;">Stack Effectif (BB)</label>
+            <div class="range-wrap">
+                <div class="stack-disp" id="stack-val">15</div>
+                <input type="range" id="stack-slide" min="1" max="50" value="15" oninput="updateStackUI(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <button class="cta-btn" onclick="analyzeHand()">ANALYSER LA MAIN</button>
+
+    <div id="result-area" class="panel" style="border-color: var(--accent);">
+        <div class="result-main">
+            <div style="font-size:0.9rem; text-transform:uppercase; letter-spacing:2px; color:var(--text-muted);">Meilleure Action</div>
+            <div class="action-big" id="res-action">ALL-IN</div>
+            <div style="color:var(--text-main);" id="res-desc">Push profitable (Nash)</div>
         </div>
 
-        <button class="analyze-btn" onclick="analyze()">ANALYSER LE SPOT</button>
+        <div class="stats-row">
+            <div class="stat-card">
+                <span class="stat-val" id="res-eq">--%</span>
+                <span class="stat-lbl">Équité</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-val" id="res-m">--</span>
+                <span class="stat-lbl">Score M</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-val" id="res-odd">--:1</span>
+                <span class="stat-lbl">Cote Pot</span>
+            </div>
+        </div>
+
+        <div class="coach-box" id="res-coach">
+            </div>
     </div>
 
-    <div id="result">
-        <div class="res-title" id="resAction">---</div>
-        <div id="resCoach" style="margin-top:10px; color: var(--text-gray);"></div>
+    <div class="panel">
+        <div class="panel-header"><i class="fas fa-history"></i> Dernières analyses</div>
+        <ul class="history-list" id="hist-list">
+            <li style="text-align:center; padding:10px;">Aucune main analysée</li>
+        </ul>
     </div>
+
 </div>
 
-<div class="modal" id="picker">
-    <h3 id="pTitle">Valeur</h3>
-    <div class="grid" id="rGrid"></div>
-    <div class="grid" id="sGrid" style="display:none;">
-        <div class="m-btn" style="color:red" onclick="pSuit('♥')">♥</div>
-        <div class="m-btn" style="color:red" onclick="pSuit('♦')">♦</div>
-        <div class="m-btn" onclick="pSuit('♠')">♠</div>
-        <div class="m-btn" onclick="pSuit('♣')">♣</div>
+<div class="modal-overlay" id="picker-modal">
+    <div class="modal-content">
+        <h3 class="modal-title" id="picker-title">Choisir Valeur</h3>
+        
+        <div class="grid-ranks" id="grid-ranks"></div>
+        
+        <div class="grid-suits" id="grid-suits" style="display:none;">
+            <div class="picker-btn" style="color:#e74c3c; border-color:#e74c3c" onclick="selectSuit('♥')">♥</div>
+            <div class="picker-btn" style="color:#e74c3c; border-color:#e74c3c" onclick="selectSuit('♦')">♦</div>
+            <div class="picker-btn" onclick="selectSuit('♠')">♠</div>
+            <div class="picker-btn" onclick="selectSuit('♣')">♣</div>
+        </div>
+
+        <button onclick="closeModal()" style="margin-top:20px; background:none; border:none; color:#8b9bb4; font-size:1rem; cursor:pointer;">Annuler</button>
     </div>
 </div>
 
 <script>
-    let cur = 0; let isKO = false;
-    let hand = [{r:null,s:null},{r:null,s:null}];
-    const ranks = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+    // --- STATE ---
+    let hand = { 1: {r:null, s:null}, 2: {r:null, s:null} };
+    let activeSlot = 1;
+    let ranks = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+    let history = [];
 
-    // Init Modal
-    const rg = document.getElementById('rGrid');
-    ranks.forEach(r => {
-        let d = document.createElement('div'); d.className='m-btn'; d.innerText=r;
-        d.onclick = () => { hand[cur-1].r=r; document.getElementById('rGrid').style.display='none'; document.getElementById('sGrid').style.display='grid'; };
-        rg.appendChild(d);
-    });
+    // --- INIT ---
+    window.onload = function() {
+        generateRankGrid();
+        updateGameMode(); // Set initial visibility
+    };
 
-    function switchT(btn, mode) {
-        document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        isKO = (mode === 'ko');
-        document.getElementById('bounty-zone').style.display = isKO ? 'block' : 'none';
+    // --- UI HELPERS ---
+    function updateGameMode() {
+        let mode = document.getElementById('game-mode').value;
+        document.getElementById('ko-options').style.display = (mode === 'ko') ? 'block' : 'none';
+        document.getElementById('ante-options').style.display = (mode === 'mtt') ? 'block' : 'none';
     }
 
-    function openPicker(s) { cur=s; document.getElementById('rGrid').style.display='grid'; document.getElementById('sGrid').style.display='none'; document.getElementById('picker').classList.add('show'); }
-    function pSuit(s) { 
-        hand[cur-1].s=s; 
-        const el = document.getElementById('slot'+cur); el.classList.add('filled');
-        el.querySelector('.card-val').innerText = hand[cur-1].r;
-        el.querySelector('.card-suit').innerText = s;
-        el.style.color = (s==='♥'||s==='♦')?'red':'black';
-        document.getElementById('picker').classList.remove('show');
+    function updateStackUI(val) {
+        document.getElementById('stack-val').innerText = val;
     }
 
-    function analyze() {
-        if(!hand[0].r || !hand[1].r) return alert("Complète ta main !");
-        const stack = parseInt(document.getElementById('stack').value);
-        const bnt = parseInt(document.getElementById('bounty-size').value);
-        const h1 = hand[0].r, h2 = hand[1].r;
-        
-        let action = "FOLD"; 
-        let coach = "Main trop faible.";
-        
-        const hasAce = (h1==='A'||h2==='A');
-        const isPair = (h1===h2);
+    function setMode(mode) {
+        document.getElementById('tab-manual').className = mode === 'manual' ? 'tab active' : 'tab';
+        document.getElementById('tab-scan').className = mode === 'scan' ? 'tab active' : 'tab';
+        document.getElementById('view-manual').style.display = mode === 'manual' ? 'block' : 'none';
+        document.getElementById('view-scan').style.display = mode === 'scan' ? 'block' : 'none';
+    }
 
-        if(isKO && bnt >= 2) {
-            if(hasAce || isPair || (h1==='K' || h2==='K')) {
-                action = "CALL / TAPIS";
-                coach = "PRIME ÉLEVÉE ! On élargit le call. Mathématiquement rentable pour le Bounty.";
+    function resetApp() {
+        hand = { 1: {r:null, s:null}, 2: {r:null, s:null} };
+        renderCards();
+        document.getElementById('result-area').style.display = 'none';
+        document.getElementById('stack-slide').value = 15;
+        updateStackUI(15);
+    }
+
+    // --- CARD PICKER LOGIC ---
+    function generateRankGrid() {
+        let grid = document.getElementById('grid-ranks');
+        grid.innerHTML = '';
+        ranks.forEach(r => {
+            let btn = document.createElement('div');
+            btn.className = 'picker-btn';
+            btn.innerText = r;
+            btn.onclick = () => selectRank(r);
+            grid.appendChild(btn);
+        });
+    }
+
+    function openPicker(slot) {
+        activeSlot = slot;
+        document.getElementById('picker-title').innerText = "Carte " + slot + " : Valeur";
+        document.getElementById('grid-ranks').style.display = 'grid';
+        document.getElementById('grid-suits').style.display = 'none';
+        document.getElementById('picker-modal').style.display = 'flex';
+    }
+
+    function selectRank(r) {
+        hand[activeSlot].r = r;
+        document.getElementById('picker-title').innerText = "Carte " + activeSlot + " : Couleur";
+        document.getElementById('grid-ranks').style.display = 'none';
+        document.getElementById('grid-suits').style.display = 'grid';
+    }
+
+    function selectSuit(s) {
+        hand[activeSlot].s = s;
+        renderCards();
+        closeModal();
+    }
+
+    function closeModal() {
+        document.getElementById('picker-modal').style.display = 'none';
+    }
+
+    function renderCards() {
+        [1, 2].forEach(num => {
+            let el = document.getElementById('c' + num);
+            let card = hand[num];
+            if (card.r) {
+                el.className = 'card-slot filled';
+                let colorClass = (card.s === '♥' || card.s === '♦') ? 'red-card' : 'black-card';
+                el.innerHTML = `<div class="c-rank ${colorClass}">${card.r}</div><div class="c-suit ${colorClass}">${card.s}</div>`;
             } else {
-                action = "FOLD"; coach = "Même pour la prime, cette main est trop moche.";
+                el.className = 'card-slot empty';
+                el.innerHTML = '';
             }
+        });
+    }
+
+    // --- CAMERA SIMULATION ---
+    function toggleCamera() {
+        let vid = document.getElementById('camera-stream');
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(stream => {
+                    vid.srcObject = stream;
+                    vid.style.display = 'block';
+                    // Simulate scan delay then analyze mock hand
+                    setTimeout(() => {
+                        stream.getTracks().forEach(t => t.stop());
+                        vid.style.display = 'none';
+                        setMode('manual');
+                        // Simulation: Give random hand
+                        hand[1] = {r:'A', s:'♥'}; hand[2] = {r:'K', s:'♠'};
+                        renderCards();
+                        alert("Scan terminé ! Validation manuelle requise.");
+                    }, 2500);
+                })
+                .catch(e => alert("Erreur caméra ou permission refusée."));
         } else {
-            if(hasAce && stack < 15) { action = "ALL-IN"; coach = "Stack court + As : on envoie tout."; }
-            else if(isPair) { action = "ALL-IN"; coach = "Paire servie = Agression maximum."; }
-            else { action = "FOLD"; coach = "Patiente, un meilleur spot viendra."; }
+            alert("Caméra non détectée.");
+        }
+    }
+
+    // --- POKER BRAIN (Logic) ---
+    function analyzeHand() {
+        if (!hand[1].r || !hand[2].r) { alert("Veuillez sélectionner vos 2 cartes."); return; }
+
+        // 1. Gather Inputs
+        let mode = document.getElementById('game-mode').value;
+        let stack = parseInt(document.getElementById('stack-slide').value);
+        let pos = document.getElementById('position').value;
+        let bounty = parseInt(document.getElementById('bounty-level').value);
+        let ante = document.getElementById('ante-bool').value === "1";
+
+        // 2. Evaluate Hand Strength (Simplified)
+        let r1 = ranks.indexOf(hand[1].r); // 0 is Ace (Strong), 12 is 2 (Weak)
+        let r2 = ranks.indexOf(hand[2].r);
+        let val1 = 14 - r1; let val2 = 14 - r2;
+        let isPair = (val1 === val2);
+        let isSuited = (hand[1].s === hand[2].s);
+        let highCard = Math.max(val1, val2);
+        let lowCard = Math.min(val1, val2);
+        let gap = highCard - lowCard;
+
+        // 3. Decision Logic Matrix
+        let action = "FOLD";
+        let color = "#f87171"; // Red
+        let explanation = "";
+        let equity = 0;
+
+        // Base Logic for Turbo/Expresso (Aggressive)
+        let pushScore = val1 + val2 + (isPair ? 10 : 0) + (isSuited ? 3 : 0) - (gap * 0.5);
+        if (pos === 'BTN' || pos === 'SB') pushScore += 5; // Position bonus
+        if (mode === 'nitro') pushScore += 4; // Nitro requires wider ranges
+
+        // Bounty Adjustment (KEY FEATURE)
+        if (mode === 'ko' && bounty > 0) {
+            pushScore += (bounty * 4); // Huge incentive to call/shove if bounty is big
         }
 
-        const res = document.getElementById('result');
-        res.style.display = 'block';
-        document.getElementById('resAction').innerText = action;
-        document.getElementById('resAction').style.color = (action==="FOLD")?"#f87171":"#4ade80";
-        document.getElementById('resCoach').innerText = coach;
+        // Logic Thresholds
+        if (stack > 25) {
+            // Deep Stack Logic
+            if (isPair && val1 >= 10) { action = "RAISE / 3-BET"; color = "#4ade80"; explanation = "Premium. Construis le pot."; }
+            else if (isPair) { action = "SET MINE"; color = "#facc15"; explanation = "Cherche le brelan pour pas cher."; }
+            else if (pushScore > 25) { action = "RAISE"; color = "#4ade80"; explanation = "Bonne main d'ouverture."; }
+            else { action = "FOLD"; explanation = "Trop faible pour jouer profond."; }
+        } else if (stack > 12) {
+            // Mid Stack
+            if (pushScore > 22) { action = "RAISE / CALL"; color = "#4ade80"; explanation = "Standard open."; }
+            else if (mode === 'ko' && bounty === 2 && pushScore > 15) { action = "SHOVE (BOUNTY)"; color = "#ffd700"; explanation = "All-in pour la prime !"; }
+            else { action = "FOLD"; explanation = "Patience."; }
+        } else {
+            // Push/Fold Territory (< 12BB)
+            if (pushScore > 18) { action = "ALL-IN"; color = "#4ade80"; explanation = "Nash Push. Mathématiquement inexploitable."; }
+            else if (mode === 'ko' && bounty > 0 && (highCard >= 11 || isPair)) { action = "CALL ALL-IN"; color = "#ffd700"; explanation = "Gamble pour le KO."; }
+            else { action = "FOLD"; explanation = "Même short, c'est poubelle."; }
+        }
+
+        // Specific overrides
+        if (isPair && val1 >= 12) { equity = 80; } // QQ+
+        else if (isPair) { equity = 65; } // 22-JJ
+        else if (highCard === 14) { equity = 60; } // Ax
+        else { equity = 40 + (pushScore/2); }
+        if (equity > 99) equity = 99;
+
+        // 4. Update UI
+        let resArea = document.getElementById('result-area');
+        resArea.style.display = 'block';
+        resArea.scrollIntoView({ behavior: 'smooth' });
+
+        document.getElementById('res-action').innerText = action;
+        document.getElementById('res-action').style.color = color;
+        document.getElementById('res-desc').innerText = (mode==='ko' && bounty>0) ? "Stratégie ajustée Bounty" : "Stratégie GTO Standard";
+        document.getElementById('res-coach').innerText = `"${explanation}"`;
+        document.getElementById('res-eq').innerText = Math.floor(equity) + "%";
+        
+        // M Score Calc
+        let blinds = 1.5; // Base
+        if (ante) blinds += 0.2; // roughly
+        let m = (stack / blinds).toFixed(1);
+        document.getElementById('res-m').innerText = m;
+        
+        // Odds (Simulated)
+        let odds = (2 + (Math.random())).toFixed(1);
+        document.getElementById('res-odd').innerText = odds + ":1";
+
+        // History
+        addToHistory(`${hand[1].r}${hand[1].s} ${hand[2].r}${hand[2].s} - ${action}`);
     }
+
+    function addToHistory(text) {
+        let ul = document.getElementById('hist-list');
+        if (ul.children[0].innerText.includes('Aucune')) ul.innerHTML = '';
+        let li = document.createElement('li');
+        li.className = 'hist-item';
+        li.innerHTML = `<span class="hist-hand">${text.split('-')[0]}</span> <span>${text.split('-')[1]}</span>`;
+        ul.prepend(li);
+    }
+
 </script>
 </body>
 </html>
