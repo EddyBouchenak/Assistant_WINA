@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TurboGTO - Coach Poker</title>
+    <title>TurboGTO - Assistant Winamax</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -15,6 +15,9 @@
             --text-gray: #8b9bb4;
             --suit-red: #e74c3c;
             --suit-black: #2c3e50;
+            --green-success: #4ade80;
+            --yellow-warning: #facc15;
+            --red-error: #f87171;
         }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -49,7 +52,9 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 0.9rem;
+            transition: all 0.2s ease;
         }
+        .reset-btn:hover { background: rgba(255,255,255,0.1); }
 
         /* MAIN CONTAINER */
         .container {
@@ -60,22 +65,90 @@
             width: 100%;
         }
 
-        /* TOURNAMENT SELECTOR */
-        .tournament-selector {
-            width: 100%;
+        /* INPUT GROUPS */
+        .input-group {
             background: var(--bg-card);
-            color: var(--text-white);
             border: 1px solid #2a3b55;
-            padding: 12px;
             border-radius: 8px;
+            padding: 15px;
             margin-bottom: 20px;
+        }
+        .input-group-title {
+            color: var(--text-white);
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* FORM ELEMENTS */
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        .form-row:last-child { margin-bottom: 0; }
+
+        .label {
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            min-width: 80px; /* Align labels */
+        }
+        
+        select, input[type="number"], input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg-dark);
+            border: 1px solid #2a3b55;
+            color: white;
+            border-radius: 5px;
             font-size: 1rem;
             appearance: none;
             background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
             background-repeat: no-repeat;
-            background-position: right 15px top 50%;
-            background-size: 12px auto;
+            background-position: right 10px top 50%;
+            background-size: 10px auto;
         }
+        input[type="number"] { background-image: none; } /* Remove arrow for number input */
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+        .checkbox-container input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid #2a3b55;
+            border-radius: 3px;
+            background-color: var(--bg-dark);
+            cursor: pointer;
+            position: relative;
+        }
+        .checkbox-container input[type="checkbox"]:checked {
+            background-color: var(--accent-red);
+            border-color: var(--accent-red);
+        }
+        .checkbox-container input[type="checkbox"]:checked::after {
+            content: "\f00c"; /* FontAwesome check icon */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--text-white);
+            font-size: 12px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
 
         /* TABS (SCAN vs MANUAL) */
         .mode-tabs {
@@ -90,15 +163,22 @@
             cursor: pointer;
             color: var(--text-gray);
             font-weight: 600;
+            position: relative;
+            transition: color 0.2s ease;
         }
         .mode-tab.active {
             color: var(--text-white);
             background: linear-gradient(to top, rgba(209, 51, 51, 0.2), transparent);
         }
-
-        /* INPUT SECTIONS */
-        .input-section { display: none; }
-        .input-section.active { display: block; }
+        .mode-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-red);
+        }
 
         /* CAMERA / UPLOAD AREA */
         .scan-area {
@@ -113,6 +193,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            cursor: pointer;
+            overflow: hidden; /* Hide overflow of video */
         }
         #video-feed {
             position: absolute;
@@ -121,6 +203,9 @@
             object-fit: cover;
             border-radius: 8px;
             display: none;
+        }
+        .scan-content {
+            z-index: 1; /* Keep content above video */
         }
         .scan-btn {
             background: transparent;
@@ -163,30 +248,17 @@
         .red { color: var(--suit-red); }
         .black { color: var(--suit-black); }
 
-        /* CONTROLS (Position & Stack) */
-        .control-group { margin-bottom: 20px; }
-        .label {
-            color: var(--text-gray);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            display: block;
-            font-weight: bold;
-        }
-        .select-input {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg-card);
-            border: 1px solid #2a3b55;
-            color: white;
-            border-radius: 5px;
-        }
-
         /* RANGE SLIDER */
         .slider-container {
             display: flex;
             align-items: center;
-            gap: 15px;
+            margin-top: 10px;
+        }
+        .slider-label {
+            min-width: 80px;
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            text-transform: uppercase;
         }
         .stack-value {
             background: #121212;
@@ -196,11 +268,13 @@
             text-align: center;
             color: var(--accent-red);
             font-weight: bold;
+            margin-left: 10px;
         }
         input[type=range] {
             flex: 1;
             -webkit-appearance: none;
             background: transparent;
+            margin-left: 10px;
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -234,8 +308,10 @@
             justify-content: center;
             align-items: center;
             gap: 10px;
+            transition: all 0.2s ease;
         }
-        .analyze-btn:active { background: var(--accent-red-hover); transform: translateY(2px); }
+        .analyze-btn:hover { background: var(--accent-red-hover); }
+        .analyze-btn:active { transform: translateY(2px); }
 
         /* RESULTS OVERLAY */
         #result-panel {
@@ -280,7 +356,7 @@
             text-align: center;
         }
         .stat-label { font-size: 0.7rem; color: var(--text-gray); text-transform: uppercase; }
-        .stat-value { font-size: 1.2rem; font-weight: bold; color: #4ade80; }
+        .stat-value { font-size: 1.2rem; font-weight: bold; color: var(--green-success); }
 
         .coach-comment {
             background: rgba(0,0,0,0.2);
@@ -303,14 +379,25 @@
             flex-direction: column;
         }
         .modal.open { display: flex; }
+        .modal-header {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
         .modal-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr); /* More ranks per row */
             gap: 10px;
-            padding: 20px;
+            padding: 0 20px;
+            max-width: 400px;
+            width: 100%;
         }
         .modal-btn {
-            padding: 15px;
+            padding: 15px 5px; /* Adjust padding */
             background: var(--bg-card);
             border: 1px solid #2a3b55;
             color: white;
@@ -318,22 +405,66 @@
             border-radius: 5px;
             cursor: pointer;
             text-align: center;
+            transition: all 0.2s ease;
         }
+        .modal-btn:hover { background: rgba(255,255,255,0.1); }
         .modal-btn.selected { background: var(--accent-red); border-color: var(--accent-red); }
         .close-modal {
-            margin-top: 20px;
             background: transparent;
             border: none;
             color: var(--text-gray);
             font-size: 2rem;
             cursor: pointer;
         }
+        
+        /* HISTORY PANEL */
+        #history-panel {
+            margin-top: 30px;
+            background: var(--bg-card);
+            border: 1px solid #2a3b55;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        #history-panel h3 {
+            margin-top: 0;
+            color: var(--text-white);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 200px; /* Scrollable history */
+            overflow-y: auto;
+            border-top: 1px solid #2a3b55;
+            padding-top: 10px;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-item .hand-info { font-weight: bold; color: var(--text-white); }
+        .history-item .action-info {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+        }
 
         /* UTILS */
         .hidden { display: none !important; }
-        .text-green { color: #4ade80; }
-        .text-yellow { color: #facc15; }
-        .text-red { color: #f87171; }
+        .text-green { color: var(--green-success); }
+        .text-yellow { color: var(--yellow-warning); }
+        .text-red { color: var(--red-error); }
     </style>
 </head>
 <body>
@@ -345,24 +476,41 @@
 
 <div class="container">
 
-    <select class="tournament-selector" id="tournament-type">
-        <option value="expresso">Expresso / Spin</option>
-        <option value="ko">KO / Bounty</option>
-        <option value="monster">Monster Stack</option>
-        <option value="main">Main Event</option>
-        <option value="flipper">Flipper / Deglingo</option>
-    </select>
-
-    <div class="mode-tabs">
-        <div class="mode-tab active" onclick="switchTab('scan')">Scan / Photo</div>
-        <div class="mode-tab" onclick="switchTab('manual')">Manuel</div>
+    <div class="input-group">
+        <div class="input-group-title"><i class="fas fa-trophy"></i> Tournoi</div>
+        <div class="form-row">
+            <label class="label" for="tournament-type">Format</label>
+            <select id="tournament-type">
+                <option value="expresso">Expresso / Spin</option>
+                <option value="ko">KO / Bounty</option>
+                <option value="monster">Monster Stack</option>
+                <option value="main">Main Event</option>
+                <option value="flipper">Flipper / Deglingo</option>
+            </select>
+        </div>
+        <div class="form-row" id="ante-row">
+            <label class="label" for="ante-size">Ante (BB)</label>
+            <input type="number" id="ante-size" value="0" min="0" max="1" step="0.05">
+        </div>
+        <div class="form-row hidden" id="bounty-row">
+            <label class="label" for="bounty-value">Bounty (€)</label>
+            <input type="number" id="bounty-value" value="0" min="0" step="1">
+        </div>
     </div>
 
-    <div id="scan-section" class="input-section active">
+    <div class="mode-tabs">
+        <div class="mode-tab active" data-tab="scan" onclick="switchTab('scan')">Scan / Photo</div>
+        <div class="mode-tab" data-tab="manual" onclick="switchTab('manual')">Manuel</div>
+    </div>
+
+    <div id="scan-section" class="input-section active input-group">
+        <div class="input-group-title"><i class="fas fa-camera"></i> Ma Main (Scan)</div>
         <div class="scan-area" onclick="triggerCamera()">
             <video id="video-feed" autoplay playsinline></video>
-            <i class="fas fa-camera scan-btn"></i>
-            <p style="color:var(--text-gray); margin-top:0;">Toucher pour activer la caméra<br>ou uploader un screen</p>
+            <div class="scan-content">
+                <i class="fas fa-camera scan-btn"></i>
+                <p style="color:var(--text-gray); margin-top:0;">Toucher pour activer la caméra<br>ou uploader un screen</p>
+            </div>
             <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
         </div>
         <div style="text-align:center; margin-top:10px;">
@@ -370,32 +518,31 @@
         </div>
     </div>
 
-    <div id="manual-section" class="input-section">
+    <div id="manual-section" class="input-section input-group">
+        <div class="input-group-title"><i class="fas fa-hand-holding-heart"></i> Ma Main (Manuelle)</div>
         <div class="cards-container">
             <div class="card-slot empty" id="card1" onclick="openCardSelector(1)"></div>
             <div class="card-slot empty" id="card2" onclick="openCardSelector(2)"></div>
         </div>
     </div>
 
-    <div class="control-group">
-        <label class="label">Position</label>
-        <select class="select-input" id="position">
-            <option value="UTG">UTG (Début)</option>
-            <option value="HJ">Hi-Jack</option>
-            <option value="CO">Cut-Off</option>
-            <option value="BTN">Bouton</option>
-            <option value="SB">Small Blind</option>
-            <option value="BB">Big Blind</option>
-        </select>
-    </div>
-
-    <div class="control-group">
-        <div class="slider-container">
-            <label class="label" style="margin:0;">Stack (BB)</label>
-            <div class="stack-value" id="stack-display">25</div>
+    <div class="input-group">
+        <div class="input-group-title"><i class="fas fa-poker-chip"></i> Situation de jeu</div>
+        <div class="form-row">
+            <label class="label" for="position">Position</label>
+            <select id="position">
+                <option value="UTG">UTG (Début)</option>
+                <option value="HJ">Hi-Jack</option>
+                <option value="CO">Cut-Off</option>
+                <option value="BTN">Bouton</option>
+                <option value="SB">Small Blind</option>
+                <option value="BB">Big Blind</option>
+            </select>
         </div>
-        <div class="slider-container" style="margin-top:10px;">
+        <div class="slider-container">
+            <label class="slider-label" for="stack-slider">Stack (BB)</label>
             <input type="range" id="stack-slider" min="1" max="100" value="25" oninput="updateStack(this.value)">
+            <div class="stack-value" id="stack-display">25</div>
         </div>
     </div>
 
@@ -418,7 +565,7 @@
             </div>
             <div class="stat-box">
                 <div class="stat-label">Cote Pot</div>
-                <div class="stat-value" id="pot-odds">2.2:1</div>
+                <div class="stat-value" id="pot-odds">--:1</div>
             </div>
         </div>
 
@@ -427,15 +574,24 @@
         </div>
     </div>
 
+    <div id="history-panel">
+        <h3><i class="fas fa-history"></i> Historique des mains</h3>
+        <ul id="history-list">
+            </ul>
+    </div>
+
 </div>
 
 <div class="modal" id="card-modal">
-    <h3 style="margin-bottom: 20px;">Choisir la carte</h3>
+    <div class="modal-header">
+        <h3>Choisir la carte</h3>
+        <button class="close-modal" onclick="closeModal()">&times;</button>
+    </div>
     
     <div class="modal-grid" id="rank-grid">
         </div>
     
-    <div style="width:100%; height:1px; background:#2a3b55; margin:10px 0;"></div>
+    <div style="width:100%; height:1px; background:#2a3b55; margin:10px 0; max-width: 400px;"></div>
 
     <div class="modal-grid" style="grid-template-columns: repeat(4, 1fr);" id="suit-grid">
         <div class="modal-btn red" onclick="selectSuit('♥')">♥</div>
@@ -443,8 +599,6 @@
         <div class="modal-btn black" onclick="selectSuit('♠')">♠</div>
         <div class="modal-btn black" onclick="selectSuit('♣')">♣</div>
     </div>
-
-    <button class="close-modal" onclick="closeModal()">&times;</button>
 </div>
 
 <script>
@@ -455,262 +609,86 @@
         card2: { rank: null, suit: null }
     };
     let tempRank = null;
+    let history = []; // To store past analyses
+
+    // --- CONFIGURATION ---
+    const RANKS = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+    const SUITS = ['♥','♦','♠','♣'];
+    const VAL_MAP = {'A':14, 'K':13, 'Q':12, 'J':11, 'T':10, '9':9, '8':8, '7':7, '6':6, '5':5, '4':4, '3':3, '2':2};
 
     // --- UI FUNCTIONS ---
+    document.addEventListener('DOMContentLoaded', () => {
+        updateStack(document.getElementById('stack-slider').value);
+        loadHistory(); // Load history on startup
+        document.getElementById('tournament-type').addEventListener('change', toggleTournamentOptions);
+        toggleTournamentOptions(); // Initialize options based on default tournament
+        initRankButtons();
+    });
+
+    function initRankButtons() {
+        const rankGrid = document.getElementById('rank-grid');
+        RANKS.forEach(r => {
+            let btn = document.createElement('div');
+            btn.className = 'modal-btn';
+            btn.innerText = r;
+            btn.onclick = () => selectRank(r, btn);
+            rankGrid.appendChild(btn);
+        });
+    }
+
     function updateStack(val) {
         document.getElementById('stack-display').innerText = val;
     }
 
     function switchTab(mode) {
-        document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.mode-tab').forEach(t => {
+            if (t.dataset.tab === mode) {
+                t.classList.add('active');
+            } else {
+                t.classList.remove('active');
+            }
+        });
         document.querySelectorAll('.input-section').forEach(s => s.classList.remove('active'));
-        
-        event.target.classList.add('active');
         document.getElementById(mode + '-section').classList.add('active');
     }
 
     function resetApp() {
+        // Reset hand
         hand = { card1: { rank: null, suit: null }, card2: { rank: null, suit: null } };
         renderCard(1);
         renderCard(2);
+
+        // Reset inputs
+        document.getElementById('tournament-type').value = 'expresso';
+        document.getElementById('ante-size').value = 0;
+        document.getElementById('bounty-value').value = 0;
+        document.getElementById('position').value = 'UTG';
+        document.getElementById('stack-slider').value = 25;
+        updateStack(25);
+        toggleTournamentOptions();
+
+        // Reset result panel
         document.getElementById('result-panel').style.display = 'none';
-        document.getElementById('video-feed').style.display = 'none';
-        document.querySelector('.scan-area p').style.display = 'block';
-        document.querySelector('.scan-btn').style.display = 'block';
-    }
 
-    // --- CAMERA / FILE HANDLING ---
-    function triggerCamera() {
-        // Check if mobile/tablet logic preferred
-        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(function(stream) {
-                const video = document.getElementById('video-feed');
-                video.srcObject = stream;
-                video.play();
-                video.style.display = 'block';
-                document.querySelector('.scan-area p').style.display = 'none';
-                document.querySelector('.scan-btn').style.display = 'none';
-                
-                // Simulate scanning process
-                setTimeout(() => {
-                    alert("Image capturée ! Analyse en cours...");
-                    // Stop stream
-                    stream.getTracks().forEach(track => track.stop());
-                    video.style.display = 'none';
-                    // Switch to manual to show simulated result
-                    switchTab('manual');
-                    // Simulate a random hand for demo if empty
-                    if(!hand.card1.rank) {
-                        simulateRandomHand();
-                    }
-                    analyzeHand();
-                }, 2000);
-            })
-            .catch(function(err) {
-                console.log(err);
-                document.getElementById('file-input').click();
-            });
-        } else {
-            document.getElementById('file-input').click();
+        // Reset scan area
+        const video = document.getElementById('video-feed');
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
         }
+        video.style.display = 'none';
+        document.querySelector('.scan-area .scan-content p').style.display = 'block';
+        document.querySelector('.scan-area .scan-content .scan-btn').style.display = 'block';
     }
 
-    function handleFileUpload(input) {
-        if (input.files && input.files[0]) {
-            // Simulate processing
-            switchTab('manual');
-            setTimeout(() => {
-                if(!hand.card1.rank) simulateRandomHand();
-                analyzeHand();
-            }, 500);
+    // --- TOURNAMENT OPTIONS VISIBILITY ---
+    function toggleTournamentOptions() {
+        const tournamentType = document.getElementById('tournament-type').value;
+        document.getElementById('ante-row').classList.add('hidden');
+        document.getElementById('bounty-row').classList.add('hidden');
+
+        if (tournamentType === 'main' || tournamentType === 'monster') {
+            document.getElementById('ante-row').classList.remove('hidden');
+        } else if (tournamentType === 'ko') {
+            document.getElementById('bounty-row').classList.remove('hidden');
         }
-    }
-
-    // --- CARD SELECTOR LOGIC ---
-    const ranks = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
-    const rankGrid = document.getElementById('rank-grid');
-    ranks.forEach(r => {
-        let btn = document.createElement('div');
-        btn.className = 'modal-btn';
-        btn.innerText = r;
-        btn.onclick = () => selectRank(r, btn);
-        rankGrid.appendChild(btn);
-    });
-
-    function openCardSelector(num) {
-        currentCardIndex = num;
-        document.getElementById('card-modal').classList.add('open');
-        // Reset selections visually
-        tempRank = null;
-        document.querySelectorAll('#rank-grid .modal-btn').forEach(b => b.classList.remove('selected'));
-    }
-
-    function closeModal() {
-        document.getElementById('card-modal').classList.remove('open');
-    }
-
-    function selectRank(r, el) {
-        tempRank = r;
-        document.querySelectorAll('#rank-grid .modal-btn').forEach(b => b.classList.remove('selected'));
-        el.classList.add('selected');
-    }
-
-    function selectSuit(s) {
-        if(!tempRank) return; // Must select rank first
-        
-        let cardKey = 'card' + currentCardIndex;
-        hand[cardKey] = { rank: tempRank, suit: s };
-        
-        renderCard(currentCardIndex);
-        closeModal();
-    }
-
-    function renderCard(idx) {
-        let data = hand['card' + idx];
-        let el = document.getElementById('card' + idx);
-        
-        if(data.rank) {
-            el.className = 'card-slot'; // remove empty
-            el.innerHTML = `
-                <div class="card-value ${['♥','♦'].includes(data.suit) ? 'red' : 'black'}">${data.rank}</div>
-                <div class="card-suit ${['♥','♦'].includes(data.suit) ? 'red' : 'black'}">${data.suit}</div>
-            `;
-            el.style.background = '#ffffff';
-        } else {
-            el.className = 'card-slot empty';
-            el.innerHTML = '';
-            el.style.background = '#eef2f3';
-        }
-    }
-
-    function simulateRandomHand() {
-        const suits = ['♥','♦','♠','♣'];
-        hand.card1 = { rank: ranks[Math.floor(Math.random()*ranks.length)], suit: suits[Math.floor(Math.random()*4)] };
-        hand.card2 = { rank: ranks[Math.floor(Math.random()*ranks.length)], suit: suits[Math.floor(Math.random()*4)] };
-        renderCard(1);
-        renderCard(2);
-    }
-
-    // --- POKER "BRAIN" (Simplified Logic) ---
-    function analyzeHand() {
-        const stack = parseInt(document.getElementById('stack-slider').value);
-        const pos = document.getElementById('position').value;
-        const tournament = document.getElementById('tournament-type').value;
-
-        // Visual Loading
-        let btn = document.querySelector('.analyze-btn');
-        let originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> CALCUL...';
-        
-        setTimeout(() => {
-            btn.innerHTML = originalText;
-            displayResult(calculateMove(hand, stack, pos, tournament));
-        }, 600);
-    }
-
-    function calculateMove(h, stack, pos, tourney) {
-        // Very simplified logic for demo purposes
-        // Converts ranks to values
-        const valMap = {'A':14, 'K':13, 'Q':12, 'J':11, 'T':10, '9':9, '8':8, '7':7, '6':6, '5':5, '4':4, '3':3, '2':2};
-        let v1 = valMap[h.card1.rank] || 0;
-        let v2 = valMap[h.card2.rank] || 0;
-        
-        let isPair = v1 === v2;
-        let isSuited = h.card1.suit === h.card2.suit;
-        let highCard = Math.max(v1, v2);
-        
-        // Logic Branching
-        let action = "FOLD";
-        let color = "text-red";
-        let equity = Math.floor(Math.random() * 20) + 20; // Default low equity
-        let advice = "Poubelle. Jette ça et attends le spot.";
-        let sub = "Trop risqué";
-
-        // STRONG HANDS
-        if (isPair && v1 >= 8) { // 88+
-            action = "ALL-IN / RAISE";
-            color = "text-green";
-            equity = 65 + Math.floor(Math.random() * 15);
-            advice = "Premium. On veut tout mettre au milieu pré-flop.";
-            sub = "Value pure";
-        } 
-        else if (isPair) { // 22-77
-            if(stack < 15) {
-                action = "ALL-IN";
-                color = "text-green";
-                equity = 50 + Math.floor(Math.random() * 10);
-                advice = "Petite paire, stack court : on envoie la couscoussière.";
-                sub = "Flip coin";
-            } else {
-                action = "SET MINE / FOLD";
-                color = "text-yellow";
-                equity = 50;
-                advice = "Call pour brelan si pas cher, sinon fold.";
-                sub = "Spéculatif";
-            }
-        }
-        else if (highCard >= 13) { // Ax, Kx
-            if (stack < 12) {
-                action = "PUSH";
-                color = "text-green";
-                equity = 55;
-                advice = "T'es short, t'as un bloqueur. Envoie la sauce.";
-                sub = "Nash Equilibrium";
-            } else if (v1 > 10 && v2 > 10) { // Broads
-                action = "RAISE";
-                color = "text-green";
-                equity = 60;
-                advice = "Bonne main pour ouvrir. Raise standard.";
-                sub = "Standard Open";
-            } else {
-                action = "FOLD / LIMP";
-                color = "text-yellow";
-                equity = 45;
-                advice = "Kicker faible. Attention au dommage collatéral.";
-                sub = "Marginal";
-            }
-        }
-        else if (isSuited && v1 + v2 > 15) {
-            action = "RAISE / CALL";
-            color = "text-green";
-            equity = 48;
-            advice = "Connecteurs assortis, ça se joue en position.";
-            sub = "Potentiel";
-        }
-
-        // Adjust for tournament type
-        if(tourney === 'ko' && action === "FOLD" && stack < 10) {
-            advice += " (En KO, on pourrait gamble si bounty élevé, mais là c'est chaud).";
-        }
-
-        // Adjust for Position (Simple heuristic)
-        if(pos === 'BTN' && action === "FOLD" && highCard > 10) {
-            action = "STEAL";
-            color = "text-yellow";
-            advice = "Au bouton, tu peux tenter de voler les blindes.";
-            sub = "Aggression de position";
-        }
-
-        return { action, color, equity, advice, sub, m: (stack / 2.5).toFixed(1) };
-    }
-
-    function displayResult(res) {
-        const panel = document.getElementById('result-panel');
-        const title = document.getElementById('action-text');
-        
-        title.innerText = res.action;
-        title.className = "advice-title " + res.color;
-        
-        document.getElementById('action-sub').innerText = res.sub;
-        document.getElementById('equity-val').innerText = res.equity + "%";
-        document.getElementById('m-val').innerText = res.m;
-        document.getElementById('coach-msg').innerText = `"${res.advice}"`;
-        
-        panel.style.display = 'block';
-        panel.scrollIntoView({ behavior: 'smooth' });
-    }
-</script>
-
-</body>
-</html>
+        // Expresso/Flipper usually don
