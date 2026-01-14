@@ -3,258 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Assistant Winamax Live - TurboGTO</title>
+    <title>TurboGTO Pro - Bounty Edition</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0f1423;
-            --bg-card: #1a2236;
-            --accent-red: #d13333;
-            --text-white: #ffffff;
-            --text-gray: #8b9bb4;
-            --suit-red: #e74c3c;
-            --suit-black: #2c3e50;
+            --bg-dark: #0f1423; --bg-card: #1a2236; --accent-red: #d13333;
+            --text-white: #ffffff; --text-gray: #8b9bb4; --suit-red: #e74c3c;
+            --gold: #f1c40f;
         }
-
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-dark); color: var(--text-white); margin: 0; padding: 0; }
+        header { padding: 15px 20px; border-bottom: 1px solid #2a3b55; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: bold; } .logo span { color: var(--accent-red); }
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; }
         
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-white);
-            margin: 0; padding: 0;
-            display: flex; flex-direction: column; min-height: 100vh;
-        }
+        .tourney-nav { display: flex; gap: 5px; margin-bottom: 15px; }
+        .t-btn { flex: 1; background: var(--bg-card); border: 1px solid #2a3b55; color: white; padding: 10px; border-radius: 5px; cursor: pointer; }
+        .t-btn.active { background: var(--accent-red); border-color: var(--accent-red); }
 
-        header {
-            padding: 15px 20px;
-            background: var(--bg-dark);
-            border-bottom: 1px solid #2a3b55;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-
-        .logo { font-size: 1.5rem; font-weight: bold; }
-        .logo span { color: var(--accent-red); }
-
-        .container { flex: 1; padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; }
-
-        /* Tournament Selector */
-        .tournament-nav {
-            display: flex; gap: 5px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 5px;
-        }
-        .tourney-btn {
-            background: var(--bg-card); border: 1px solid #2a3b55; color: white;
-            padding: 8px 12px; border-radius: 5px; white-space: nowrap; cursor: pointer;
-        }
-        .tourney-btn.active { background: var(--accent-red); border-color: var(--accent-red); }
-
-        /* Main Section */
-        .section-card {
-            background: var(--bg-card); border-radius: 10px; padding: 15px; margin-bottom: 20px;
-            border: 1px solid #2a3b55;
-        }
-
-        .cards-display {
-            display: flex; justify-content: center; gap: 20px; margin: 20px 0;
-        }
-        .card-slot {
-            width: 80px; height: 110px; background: #2a3b55; border-radius: 8px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; border: 2px solid transparent;
-        }
-        .card-slot.active { border-color: var(--accent-red); background: #3a4b65; }
+        .card-section { background: var(--bg-card); border-radius: 10px; padding: 15px; border: 1px solid #2a3b55; margin-bottom: 15px; }
+        .cards-display { display: flex; justify-content: center; gap: 15px; margin: 15px 0; }
+        .card-slot { width: 75px; height: 100px; background: #2a3b55; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; border: 2px solid transparent; }
         .card-slot.filled { background: white; color: black; }
-        .card-val { font-size: 2rem; font-weight: bold; }
-        .card-suit { font-size: 1.5rem; }
+        .card-val { font-size: 1.8rem; font-weight: bold; }
+        
+        .input-row { margin-bottom: 12px; }
+        .label { color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        select, input { width: 100%; padding: 10px; background: var(--bg-dark); border: 1px solid #2a3b55; color: white; border-radius: 5px; }
+        
+        #bounty-zone { display: none; border: 1px solid var(--gold); padding: 10px; border-radius: 5px; margin-bottom: 15px; background: rgba(241, 196, 15, 0.05); }
+        .gold-text { color: var(--gold); font-weight: bold; }
 
-        /* Controls */
-        .label { color: var(--text-gray); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        select, input {
-            width: 100%; padding: 12px; background: var(--bg-dark); border: 1px solid #2a3b55;
-            color: white; border-radius: 5px; margin-bottom: 15px;
-        }
-
-        .slider-box { display: flex; align-items: center; gap: 10px; }
-        .stack-val { background: black; color: var(--accent-red); padding: 5px 10px; border-radius: 5px; font-weight: bold; min-width: 45px; text-align: center; }
-
-        .analyze-btn {
-            width: 100%; background: var(--accent-red); color: white; border: none;
-            padding: 18px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;
-        }
-
-        /* Modal */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; justify-content: center; align-items: center;
-        }
+        .analyze-btn { width: 100%; background: var(--accent-red); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        
+        #result { display: none; margin-top: 20px; padding: 20px; background: var(--bg-card); border-radius: 10px; text-align: center; border-top: 4px solid var(--accent-red); }
+        .res-title { font-size: 2.2rem; font-weight: 900; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
         .modal.show { display: flex; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; width: 100%; max-width: 400px; }
-        .m-btn {
-            background: var(--bg-card); border: 1px solid #2a3b55; color: white;
-            padding: 15px; border-radius: 5px; text-align: center; font-weight: bold; cursor: pointer;
-        }
-        .m-btn.red { color: var(--suit-red); }
-
-        /* Result */
-        #result { display: none; margin-top: 20px; text-align: center; padding: 20px; background: var(--bg-card); border-radius: 10px; border-left: 5px solid var(--accent-red); }
-        .res-title { font-size: 2.5rem; font-weight: 800; margin: 0; }
-        .res-desc { color: var(--text-gray); font-style: italic; margin-top: 10px; }
+        .m-btn { background: var(--bg-card); border: 1px solid #2a3b55; color: white; padding: 15px; border-radius: 5px; text-align: center; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo">TURBO<span>GTO</span></div>
-    <button onclick="location.reload()" style="background:none; border:none; color:var(--text-gray); cursor:pointer;"><i class="fas fa-sync"></i> Reset</button>
+    <div style="font-size: 0.8rem; color: var(--text-gray);">COACH BOUNTY v2</div>
 </header>
 
 <div class="container">
-    <div class="tournament-nav" id="tourneyNav">
-        <button class="tourney-btn active" onclick="setTourney(this, 'Expresso')">Expresso</button>
-        <button class="tourney-btn" onclick="setTourney(this, 'KO')">KO / Bounty</button>
-        <button class="tourney-btn" onclick="setTourney(this, 'Monster')">Monster Stack</button>
-        <button class="tourney-btn" onclick="setTourney(this, 'Main')">Main Event</button>
+    <div class="tourney-nav">
+        <button class="t-btn active" onclick="switchT(this, 'classic')">Classique</button>
+        <button class="t-btn" onclick="switchT(this, 'ko')">KO / Bounty</button>
     </div>
 
-    <div class="section-card">
-        <span class="label">Ma Main</span>
-        <div class="cards-display">
-            <div class="card-slot" id="slot1" onclick="openPicker(1)">
-                <div class="card-val">?</div>
-                <div class="card-suit"></div>
-            </div>
-            <div class="card-slot" id="slot2" onclick="openPicker(2)">
-                <div class="card-val">?</div>
-                <div class="card-suit"></div>
-            </div>
-        </div>
-        
-        <label class="label">Position</label>
-        <select id="pos">
-            <option value="UTG">UTG (Début)</option>
-            <option value="HJ">Hi-Jack</option>
-            <option value="CO">Cut-Off</option>
-            <option value="BTN" selected>Bouton</option>
-            <option value="SB">Small Blind</option>
-            <option value="BB">Big Blind</option>
+    <div id="bounty-zone">
+        <label class="label gold-text">Prime de l'adversaire (Bounty)</label>
+        <select id="bounty-size">
+            <option value="0">Pas de prime (ou il me couvre)</option>
+            <option value="1">Petite prime</option>
+            <option value="2">Grosse prime (x3+)</option>
+            <option value="3">ÉNORME Prime (Couvre mon Buy-in)</option>
         </select>
+    </div>
 
-        <label class="label">Stack (BB)</label>
-        <div class="slider-box">
-            <input type="range" id="stackRange" min="1" max="100" value="20" oninput="updateStack(this.value)">
-            <div class="stack-val" id="stackLabel">20</div>
+    <div class="card-section">
+        <div class="cards-display">
+            <div class="card-slot" id="slot1" onclick="openPicker(1)"><div class="card-val">?</div><div class="card-suit"></div></div>
+            <div class="card-slot" id="slot2" onclick="openPicker(2)"><div class="card-val">?</div><div class="card-suit"></div></div>
         </div>
 
-        <button class="analyze-btn" onclick="analyze()">ANALYSER LA MAIN</button>
+        <div class="input-row">
+            <label class="label">Ma Position</label>
+            <select id="pos">
+                <option value="UTG">UTG</option><option value="CO">Cut-Off</option>
+                <option value="BTN" selected>Bouton</option><option value="SB">Small Blind</option>
+                <option value="BB">Big Blind</option>
+            </select>
+        </div>
+
+        <div class="input-row">
+            <label class="label">Mon Stack : <span id="stackLab" style="color:var(--accent-red)">20</span> BB</label>
+            <input type="range" id="stack" min="1" max="100" value="20" oninput="document.getElementById('stackLab').innerText=this.value">
+        </div>
+
+        <button class="analyze-btn" onclick="analyze()">ANALYSER LE SPOT</button>
     </div>
 
     <div id="result">
-        <div class="res-title" id="resAction">CHECK</div>
-        <div id="resStats" style="margin: 10px 0; color: #4ade80; font-weight: bold;"></div>
-        <div class="res-desc" id="resCoach"></div>
+        <div class="res-title" id="resAction">---</div>
+        <div id="resCoach" style="margin-top:10px; color: var(--text-gray);"></div>
     </div>
 </div>
 
 <div class="modal" id="picker">
-    <h3 id="pickerTitle">Carte 1 : Valeur</h3>
-    <div class="grid" id="rankGrid">
-        </div>
-    <div class="grid" id="suitGrid" style="display:none;">
-        <div class="m-btn red" onclick="pickSuit('♥')">♥</div>
-        <div class="m-btn red" onclick="pickSuit('♦')">♦</div>
-        <div class="m-btn" onclick="pickSuit('♠')">♠</div>
-        <div class="m-btn" onclick="pickSuit('♣')">♣</div>
+    <h3 id="pTitle">Valeur</h3>
+    <div class="grid" id="rGrid"></div>
+    <div class="grid" id="sGrid" style="display:none;">
+        <div class="m-btn" style="color:red" onclick="pSuit('♥')">♥</div>
+        <div class="m-btn" style="color:red" onclick="pSuit('♦')">♦</div>
+        <div class="m-btn" onclick="pSuit('♠')">♠</div>
+        <div class="m-btn" onclick="pSuit('♣')">♣</div>
     </div>
-    <button onclick="closePicker()" style="margin-top:20px; background:none; border:none; color:white; cursor:pointer;">Annuler</button>
 </div>
 
 <script>
-    let currentSlot = 0;
-    let tourney = "Expresso";
-    let hand = [ {r:null, s:null}, {r:null, s:null} ];
+    let cur = 0; let isKO = false;
+    let hand = [{r:null,s:null},{r:null,s:null}];
     const ranks = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
 
-    // Initialisation
-    const rankGrid = document.getElementById('rankGrid');
+    // Init Modal
+    const rg = document.getElementById('rGrid');
     ranks.forEach(r => {
-        let div = document.createElement('div');
-        div.className = 'm-btn';
-        div.innerText = r;
-        div.onclick = () => pickRank(r);
-        rankGrid.appendChild(div);
+        let d = document.createElement('div'); d.className='m-btn'; d.innerText=r;
+        d.onclick = () => { hand[cur-1].r=r; document.getElementById('rGrid').style.display='none'; document.getElementById('sGrid').style.display='grid'; };
+        rg.appendChild(d);
     });
 
-    function setTourney(btn, name) {
-        document.querySelectorAll('.tourney-btn').forEach(b => b.classList.remove('active'));
+    function switchT(btn, mode) {
+        document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        tourney = name;
+        isKO = (mode === 'ko');
+        document.getElementById('bounty-zone').style.display = isKO ? 'block' : 'none';
     }
 
-    function updateStack(v) { document.getElementById('stackLabel').innerText = v; }
-
-    function openPicker(slot) {
-        currentSlot = slot;
-        document.getElementById('pickerTitle').innerText = "Carte " + slot + " : Valeur";
-        document.getElementById('rankGrid').style.display = 'grid';
-        document.getElementById('suitGrid').style.display = 'none';
-        document.getElementById('picker').classList.add('show');
+    function openPicker(s) { cur=s; document.getElementById('rGrid').style.display='grid'; document.getElementById('sGrid').style.display='none'; document.getElementById('picker').classList.add('show'); }
+    function pSuit(s) { 
+        hand[cur-1].s=s; 
+        const el = document.getElementById('slot'+cur); el.classList.add('filled');
+        el.querySelector('.card-val').innerText = hand[cur-1].r;
+        el.querySelector('.card-suit').innerText = s;
+        el.style.color = (s==='♥'||s==='♦')?'red':'black';
+        document.getElementById('picker').classList.remove('show');
     }
-
-    function pickRank(r) {
-        hand[currentSlot-1].r = r;
-        document.getElementById('pickerTitle').innerText = "Carte " + currentSlot + " : Couleur";
-        document.getElementById('rankGrid').style.display = 'none';
-        document.getElementById('suitGrid').style.display = 'grid';
-    }
-
-    function pickSuit(s) {
-        hand[currentSlot-1].s = s;
-        updateCardUI(currentSlot);
-        closePicker();
-    }
-
-    function updateCardUI(slot) {
-        const card = hand[slot-1];
-        const el = document.getElementById('slot' + slot);
-        el.classList.add('filled');
-        el.querySelector('.card-val').innerText = card.r;
-        el.querySelector('.card-suit').innerText = card.s;
-        el.style.color = (card.s === '♥' || card.s === '♦') ? 'var(--suit-red)' : 'black';
-    }
-
-    function closePicker() { document.getElementById('picker').classList.remove('show'); }
 
     function analyze() {
-        if (!hand[0].r || !hand[1].r) { alert("Choisis tes 2 cartes d'abord !"); return; }
-        
-        const stack = parseInt(document.getElementById('stackRange').value);
-        const pos = document.getElementById('pos').value;
+        if(!hand[0].r || !hand[1].r) return alert("Complète ta main !");
+        const stack = parseInt(document.getElementById('stack').value);
+        const bnt = parseInt(document.getElementById('bounty-size').value);
         const h1 = hand[0].r, h2 = hand[1].r;
-        const suited = hand[0].s === hand[1].s;
         
-        let action = "FOLD";
-        let coach = "Trop faible pour cette position.";
-        let equity = "15%";
+        let action = "FOLD"; 
+        let coach = "Main trop faible.";
+        
+        const hasAce = (h1==='A'||h2==='A');
+        const isPair = (h1===h2);
 
-        // Logique simplifiée Nash / Turbo
-        const isAce = (h1 === 'A' || h2 === 'A');
-        const isPair = (h1 === h2);
-        
-        if (isAce) {
-            if (stack < 15) { action = "ALL-IN"; coach = "En Turbo, on ne lâche pas un As avec ce stack."; equity = "58%"; }
-            else { action = "RAISE"; coach = "Ouvre à 2bb pour tester les blindes."; equity = "62%"; }
-        } else if (isPair) {
-            action = "ALL-IN"; coach = "Paire servie. On veut voir les 5 cartes ou prendre les blindes."; equity = "70%";
-        } else if (suited && stack < 10) {
-            action = "ALL-IN"; coach = "Dernière chance, ta main a du potentiel de flush."; equity = "40%";
+        if(isKO && bnt >= 2) {
+            if(hasAce || isPair || (h1==='K' || h2==='K')) {
+                action = "CALL / TAPIS";
+                coach = "PRIME ÉLEVÉE ! On élargit le call. Mathématiquement rentable pour le Bounty.";
+            } else {
+                action = "FOLD"; coach = "Même pour la prime, cette main est trop moche.";
+            }
+        } else {
+            if(hasAce && stack < 15) { action = "ALL-IN"; coach = "Stack court + As : on envoie tout."; }
+            else if(isPair) { action = "ALL-IN"; coach = "Paire servie = Agression maximum."; }
+            else { action = "FOLD"; coach = "Patiente, un meilleur spot viendra."; }
         }
 
+        const res = document.getElementById('result');
+        res.style.display = 'block';
         document.getElementById('resAction').innerText = action;
-        document.getElementById('resAction').style.color = (action === "FOLD") ? "#f87171" : "#4ade80";
-        document.getElementById('resStats').innerText = "Équité estimée : " + equity;
-        document.getElementById('resCoach').innerText = tourney + " (" + pos + ") : " + coach;
-        document.getElementById('result').style.display = 'block';
+        document.getElementById('resAction').style.color = (action==="FOLD")?"#f87171":"#4ade80";
+        document.getElementById('resCoach').innerText = coach;
     }
 </script>
-
 </body>
 </html>
